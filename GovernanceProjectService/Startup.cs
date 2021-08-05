@@ -1,7 +1,11 @@
+using GovernanceProjectService.Data;
+using GovernanceProjectService.Helpers;
+using GovernanceProjectService.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -32,6 +36,11 @@ namespace GovernanceProjectService
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "GovernanceProjectService", Version = "v1" });
             });
+
+            services.AddDbContext<GesitDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+
+            services.AddScoped<INotification, NotificationData>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -43,6 +52,8 @@ namespace GovernanceProjectService
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "GovernanceProjectService v1"));
             }
+
+            app.UseCorsMiddleware();
 
             app.UseHttpsRedirection();
 
