@@ -1,6 +1,7 @@
 using GovernanceProjectService.Data;
 using GovernanceProjectService.Helpers;
 using GovernanceProjectService.Models;
+using GovernanceProjectService.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -39,6 +40,7 @@ namespace GovernanceProjectService
 
             services.AddDbContext<GesitDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
+            services.AddTransient<IFileService, FileService>();
             services.AddScoped<INotification, NotificationData>();
 
         }
