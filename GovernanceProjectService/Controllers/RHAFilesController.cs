@@ -30,10 +30,30 @@ namespace GovernanceProjectService.Controllers
 
         //// GET: api/<RHAFilesController>
         [HttpGet]
-        public async Task<IEnumerable<Rhafile>> Get()
+        public async Task<IActionResult> Get()
         {
-            //return new string[] { "value1", "value2" };
-            return await _rhaFile.GetAll();
+            var results = await _rhaFile.GetAll();
+            var files = results.ToList();
+            List<byte[]> myArrays = new List<byte[]>();
+            files.ForEach(async file =>
+            {
+                var path = file.FilePath;
+                var fileName = file.FileName;
+                var fileType = file.FileType;
+                var memory = new MemoryStream();
+                using (var stream = new FileStream(path, FileMode.Open))
+                {
+                    await stream.CopyToAsync(memory);
+                }
+                byte[] arr = memory.ToArray();
+                myArrays.Add(arr);
+            });
+            //files.ForEach(file =>
+            //{
+            //    var fileId = file.Id;
+            //});
+            // dari fe dibinding pake id di-endpointnya
+            return Ok(new { data = files});
         }
 
         //// GET api/<RHAFilesController>/5
@@ -47,17 +67,66 @@ namespace GovernanceProjectService.Controllers
             var path = results.FilePath;
             var fileName = results.FileName;
             var fileType = results.FileType;
+            //byte[] arr = File.ReadAllBytes(fileName);
             //var files = Directory.GetFiles(path);
             var memory = new MemoryStream();
             using (var stream = new FileStream(path, FileMode.Open))
             {
                 await stream.CopyToAsync(memory);
             }
+            byte[] arr = memory.ToArray();
+            memory.Position = 0;
+            //return File(memory, fileType, fileName);
+            return Ok(new { data = results, file = arr });
+            //return File.ReadAllBytes(fileName);
+        }
+
+        [HttpGet("GetOnlyDetails/{id}")]
+        public async Task<IActionResult> GetOnlyDetails(int id)
+        {
+            var results = await _rhaFile.GetById(id.ToString());
+            if (results == null)
+                return BadRequest(new { status = "Error", message = "There is no such a file" });
+
+            //var path = results.FilePath;
+            //var fileName = results.FileName;
+            //var fileType = results.FileType;
+            ////byte[] arr = File.ReadAllBytes(fileName);
+            ////var files = Directory.GetFiles(path);
+            //var memory = new MemoryStream();
+            //using (var stream = new FileStream(path, FileMode.Open))
+            //{
+            //    await stream.CopyToAsync(memory);
+            //}
+            //byte[] arr = memory.ToArray();
+            //memory.Position = 0;
+            //return File(memory, fileType, fileName);
+            return Ok(new { data = results });
+            //return File.ReadAllBytes(fileName);
+        }
+
+        [HttpGet("GetOnlyFile/{id}")]
+        public async Task<IActionResult> GetOnlyFile(int id)
+        {
+            var results = await _rhaFile.GetById(id.ToString());
+            if (results == null)
+                return BadRequest(new { status = "Error", message = "There is no such a file" });
+
+            var path = results.FilePath;
+            var fileName = results.FileName;
+            var fileType = results.FileType;
+            //byte[] arr = File.ReadAllBytes(fileName);
+            //var files = Directory.GetFiles(path);
+            var memory = new MemoryStream();
+            using (var stream = new FileStream(path, FileMode.Open))
+            {
+                await stream.CopyToAsync(memory);
+            }
+            byte[] arr = memory.ToArray();
             memory.Position = 0;
             return File(memory, fileType, fileName);
-
-            //return Ok();
-
+            //return Ok(new { data = results });
+            //return File.ReadAllBytes(fileName);
         }
 
         // POST api/<RHAFilesController>
