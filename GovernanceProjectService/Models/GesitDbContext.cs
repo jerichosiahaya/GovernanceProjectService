@@ -138,7 +138,6 @@ namespace GovernanceProjectService.Models
                     .HasColumnName("target_date");
 
                 entity.Property(e => e.TindakLanjut)
-                    .IsRequired()
                     .HasMaxLength(255)
                     .HasColumnName("tindak_lanjut");
 
