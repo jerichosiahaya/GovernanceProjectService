@@ -19,7 +19,6 @@ namespace GovernanceProjectService.Models
         public string Kondisi { get; set; }
         [Required]
         public string Rekomendasi { get; set; }
-        [Required]
         public string TindakLanjut { get; set; }
         public DateTime? TargetDate { get; set; }
         [Required]
