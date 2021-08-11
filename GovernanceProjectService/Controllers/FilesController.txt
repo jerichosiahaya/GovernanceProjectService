@@ -1,0 +1,85 @@
+﻿using GovernanceProjectService.Data;
+using GovernanceProjectService.Models;
+using GovernanceProjectService.Services;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace GovernanceProjectService.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class FilesController : ControllerBase
+    {
+        private IHostingEnvironment _hostingEnvironment;
+        private IRhafile _rhaFile;
+        private readonly IFileService _fileService;
+        public FilesController(IFileService fileService, IRhafile rhaFile, IHostingEnvironment hostingEnvironment)
+        {
+            _fileService = fileService;
+            _rhaFile = rhaFile;
+            _hostingEnvironment = hostingEnvironment;
+        }
+
+        List<string> allowedFileExtensions = new List<string>() { "jpg", "png", "doc", "docx", "xls", "xlsx", "pdf", "csv", "txt", "zip", "rar" };
+        //private readonly List allowedFileExtensions = new List() { "pdf", "xlx", "doc", "docx", "xlxs" };
+
+        [HttpPost(nameof(Post))]
+        public IActionResult Post([Required] IFormFile formFile)
+        {
+            try
+            {
+                if (formFile.Length <= 0)
+                {
+                   return BadRequest(new {status = "Error", message = "File is empty" });
+                } 
+                else if (formFile.Length > 2000000)
+                {
+                    return BadRequest(new {status = "Error", message = "Maximum file upload exceeded" });
+                }
+
+                string s = formFile.FileName;
+                int i = s.LastIndexOf('.');
+                string lhs = i < 0 ? s : s.Substring(0, i),
+                    rhs = i < 0 ? "" : s.Substring(i + 1);
+                //var fileExtension = formFile.FileName.Split.LasO('.')[1];
+                if (!allowedFileExtensions.Any(a => a.Equals(rhs)))
+                {
+                    return BadRequest(new {status = "Error", message = $"File with extension {rhs} is not allowed", logtime = DateTime.Now });
+                }
+                var target = Path.Combine(_hostingEnvironment.ContentRootPath, "UploadedFiles");
+                var filePath = Path.Combine(target, formFile.FileName);
+                _fileService.UploadFile(formFile);
+                //return Ok(new { Size = _fileService.SizeConverter(formFile.Sum(f => f.Length)) });
+                return Ok(new { status = "Success", message = "File successfully uploaded", file_size = _fileService.SizeConverter(formFile.Length), file_path = filePath, logtime = DateTime.Now });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet(nameof(Download))]
+        public IActionResult Download()
+        {
+
+            try
+            {
+                var subDirectory = "UploadedFiles";
+                var (fileType, archiveData, archiveName) = _fileService.DownloadFiles(subDirectory);
+                return File(archiveData, fileType, archiveName);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+        }
+    }
+}

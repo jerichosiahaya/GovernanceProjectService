@@ -40,8 +40,9 @@ namespace GovernanceProjectService
 
             services.AddDbContext<GesitDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
-            services.AddTransient<IFileService, FileService>();
+            //services.AddTransient<IFileService, FileService>();
             services.AddScoped<INotification, NotificationData>();
+            services.AddScoped<IRhafile, RhafileData>();
 
         }
 

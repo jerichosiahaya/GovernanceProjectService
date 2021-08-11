@@ -8,7 +8,7 @@ namespace GovernanceProjectService.Services
 {
     public interface IFileService
     {
-        void UploadFile(List<IFormFile> files);
+        Task UploadFile(IFormFile file);
         (string fileType, byte[] archiveData, string archiveName) DownloadFiles(string subDirectory);
         string SizeConverter(long bytes);
     }

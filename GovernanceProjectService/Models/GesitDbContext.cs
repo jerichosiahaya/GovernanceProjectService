@@ -18,6 +18,7 @@ namespace GovernanceProjectService.Models
         }
 
         public virtual DbSet<Notification> Notifications { get; set; }
+        public virtual DbSet<Rhafile> Rhafiles { get; set; }
 
 //        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 //        {
@@ -72,6 +73,74 @@ namespace GovernanceProjectService.Models
                 entity.Property(e => e.TargetDate)
                     .HasColumnType("date")
                     .HasColumnName("target_date");
+
+                entity.Property(e => e.UpdatedAt)
+                    .HasColumnType("datetime")
+                    .HasColumnName("updated_at");
+            });
+
+            modelBuilder.Entity<Rhafile>(entity =>
+            {
+                entity.ToTable("RHAFiles");
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.Assign)
+                    .IsRequired()
+                    .HasMaxLength(255)
+                    .HasColumnName("assign");
+
+                entity.Property(e => e.CreatedAt)
+                    .HasColumnType("datetime")
+                    .HasColumnName("created_at");
+
+                entity.Property(e => e.CreatedBy)
+                    .HasMaxLength(255)
+                    .HasColumnName("created_by");
+
+                entity.Property(e => e.FileName)
+                    .IsRequired()
+                    .HasMaxLength(255)
+                    .HasColumnName("file_name");
+
+                entity.Property(e => e.FilePath)
+                    .IsRequired()
+                    .HasMaxLength(255)
+                    .HasColumnName("file_path");
+
+                entity.Property(e => e.FileSize)
+                    .IsRequired()
+                    .HasMaxLength(255)
+                    .HasColumnName("file_size");
+
+                entity.Property(e => e.FileType)
+                    .IsRequired()
+                    .HasMaxLength(255)
+                    .HasColumnName("file_type");
+
+                entity.Property(e => e.Kondisi)
+                    .IsRequired()
+                    .HasMaxLength(255)
+                    .HasColumnName("kondisi");
+
+                entity.Property(e => e.Rekomendasi)
+                    .IsRequired()
+                    .HasMaxLength(255)
+                    .HasColumnName("rekomendasi");
+
+                entity.Property(e => e.SubKondisi)
+                    .IsRequired()
+                    .HasMaxLength(255)
+                    .HasColumnName("sub_kondisi");
+
+                entity.Property(e => e.TargetDate)
+                    .HasColumnType("date")
+                    .HasColumnName("target_date");
+
+                entity.Property(e => e.TindakLanjut)
+                    .IsRequired()
+                    .HasMaxLength(255)
+                    .HasColumnName("tindak_lanjut");
 
                 entity.Property(e => e.UpdatedAt)
                     .HasColumnType("datetime")

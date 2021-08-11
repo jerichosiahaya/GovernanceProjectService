@@ -64,22 +64,21 @@ namespace GovernanceProjectService.Services
             }
         }
 
-        public void UploadFile(List<IFormFile> files)
+        public async Task UploadFile(IFormFile file)
         {
             var subDirectory = "UploadedFiles";
             var target = Path.Combine(_hostingEnvironment.ContentRootPath, subDirectory);
-
             Directory.CreateDirectory(target);
 
-            files.ForEach(async file =>
-            {
-                if (file.Length <= 0) return;
+                //if (file.Length <= 0) 
+                //    return;
+                
                 var filePath = Path.Combine(target, file.FileName);
                 using (var stream = new FileStream(filePath, FileMode.Create))
                 {
                     await file.CopyToAsync(stream);
                 }
-            });
+            
         }
     }
 }
