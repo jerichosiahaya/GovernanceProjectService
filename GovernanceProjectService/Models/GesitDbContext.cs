@@ -19,6 +19,7 @@ namespace GovernanceProjectService.Models
 
         public virtual DbSet<Notification> Notifications { get; set; }
         public virtual DbSet<Rhafile> Rhafiles { get; set; }
+        public virtual DbSet<RhafilesEvidence> RhafilesEvidences { get; set; }
 
 //        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 //        {
@@ -108,10 +109,7 @@ namespace GovernanceProjectService.Models
                     .HasMaxLength(255)
                     .HasColumnName("file_path");
 
-                entity.Property(e => e.FileSize)
-                    .IsRequired()
-                    .HasMaxLength(255)
-                    .HasColumnName("file_size");
+                entity.Property(e => e.FileSize).HasColumnName("file_size");
 
                 entity.Property(e => e.FileType)
                     .IsRequired()
@@ -144,6 +142,52 @@ namespace GovernanceProjectService.Models
                 entity.Property(e => e.UpdatedAt)
                     .HasColumnType("datetime")
                     .HasColumnName("updated_at");
+            });
+
+            modelBuilder.Entity<RhafilesEvidence>(entity =>
+            {
+                entity.ToTable("RHAFilesEvidence");
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.CreatedAt)
+                    .HasColumnType("datetime")
+                    .HasColumnName("created_at");
+
+                entity.Property(e => e.CreatedBy)
+                    .HasMaxLength(255)
+                    .HasColumnName("created_by");
+
+                entity.Property(e => e.FileName)
+                    .IsRequired()
+                    .HasMaxLength(255)
+                    .HasColumnName("file_name");
+
+                entity.Property(e => e.FilePath)
+                    .IsRequired()
+                    .HasMaxLength(255)
+                    .HasColumnName("file_path");
+
+                entity.Property(e => e.FileSize).HasColumnName("file_size");
+
+                entity.Property(e => e.FileType)
+                    .IsRequired()
+                    .HasMaxLength(255)
+                    .HasColumnName("file_type");
+
+                entity.Property(e => e.RhafilesId).HasColumnName("rhafiles_id");
+
+                entity.Property(e => e.Status).HasColumnName("status");
+
+                entity.Property(e => e.UpdatedAt)
+                    .HasColumnType("datetime")
+                    .HasColumnName("updated_at");
+
+                entity.HasOne(d => d.Rhafiles)
+                    .WithMany(p => p.RhafilesEvidences)
+                    .HasForeignKey(d => d.RhafilesId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__RHAFilesE__rhafi__5DCAEF64");
             });
 
             OnModelCreatingPartial(modelBuilder);

@@ -50,7 +50,7 @@ namespace GovernanceProjectService.Data
 
         public async Task<IEnumerable<Rhafile>> GetAll()
         {
-            var result = await _db.Rhafiles.OrderByDescending(s => s.CreatedAt).AsNoTracking().ToListAsync();
+            var result = await _db.Rhafiles.Include(e => e.RhafilesEvidences).OrderByDescending(s => s.CreatedAt).AsNoTracking().ToListAsync();
             return result;
         }
 
