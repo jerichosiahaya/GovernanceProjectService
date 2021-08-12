@@ -54,6 +54,12 @@ namespace GovernanceProjectService.Data
             return result;
         }
 
+        public async Task<IEnumerable<Rhafile>> GetByNPP(string npp)
+        {
+            var result = await _db.Rhafiles.Where(s => s.Assign == npp).AsNoTracking().ToListAsync();
+            return result;
+        }
+
         //public Task UploadFile(IFormFile file)
         //{
         //    throw new NotImplementedException();

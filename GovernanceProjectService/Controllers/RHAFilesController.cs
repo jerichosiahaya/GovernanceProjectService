@@ -129,6 +129,16 @@ namespace GovernanceProjectService.Controllers
             //return File.ReadAllBytes(fileName);
         }
 
+        [HttpGet("GetByNPP/{npp}")]
+        public async Task<IActionResult> GetByNPP(string npp)
+        {
+            var results = await _rhaFile.GetByNPP(npp);
+            var count = results.ToList();
+            if (results == null)
+                return BadRequest(new { status = "Error", message = "There is no such a file" });
+            return Ok(new { count = count.Count, data = results });
+        }
+
         // POST api/<RHAFilesController>
         [HttpPost(nameof(Upload))]
         public async Task<IActionResult> Upload([Required] IFormFile formFile, [FromForm] Rhafile rhafile)
@@ -177,6 +187,8 @@ namespace GovernanceProjectService.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        
 
         //[HttpPost]
         //public async Task<IActionResult> Post([FromForm] Rhafile rhafile)

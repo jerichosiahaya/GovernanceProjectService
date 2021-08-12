@@ -10,5 +10,6 @@ namespace GovernanceProjectService.Data
     public interface IRhafile : ICrud<Rhafile>
     {
         //Task UploadFile(IFormFile file);
+        Task<IEnumerable<Rhafile>> GetByNPP(string npp);
     }
 }
