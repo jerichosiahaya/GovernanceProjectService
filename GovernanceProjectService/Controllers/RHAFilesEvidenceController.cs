@@ -97,11 +97,11 @@ namespace GovernanceProjectService.Controllers
             }
         }
 
-        //// PUT api/<RHAFilesEvidenceController>/5
-        //[HttpPut("{id}")]
-        //public void Put(int id, [FromBody] string value)
-        //{
-        //}
+        // PUT api/<RHAFilesEvidenceController>/5
+        [HttpPut("{id}")]
+        public void Put(int id, [FromBody] string value)
+        {
+        }
 
         //// DELETE api/<RHAFilesEvidenceController>/5
         //[HttpDelete("{id}")]
