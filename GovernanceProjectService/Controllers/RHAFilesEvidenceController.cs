@@ -1,5 +1,6 @@
 ﻿using GovernanceProjectService.Data;
 using GovernanceProjectService.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -8,13 +9,16 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace GovernanceProjectService.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class RHAFilesEvidenceController : ControllerBase
@@ -47,6 +51,81 @@ namespace GovernanceProjectService.Controllers
         //{
         //    return "value";
         //}
+
+        [HttpGet("GetOnlyFile/{id}")]
+        public async Task<IActionResult> GetOnlyFile(int id)
+        {
+            var results = await _rhaFileEvidence.GetById(id.ToString());
+            if (results == null)
+                return BadRequest(new { status = "Error", message = "There is no such a file" });
+
+            var path = results.FilePath;
+            var fileName = results.FileName;
+            var fileType = results.FileType;
+            //byte[] arr = File.ReadAllBytes(fileName);
+            //var files = Directory.GetFiles(path);
+            var memory = new MemoryStream();
+            using (var stream = new FileStream(path, FileMode.Open))
+            {
+                await stream.CopyToAsync(memory);
+            }
+            byte[] arr = memory.ToArray();
+            memory.Position = 0;
+            return File(memory, fileType, fileName);
+            //return Ok(new { data = results });
+            //return File.ReadAllBytes(fileName);
+        }
+
+        [HttpGet("{rhaId}")]
+        public async Task<IActionResult> GetByRhaID(string rhaId)
+        {
+            var results = await _rhaFileEvidence.GetByRhaID(rhaId);
+            var files = results.ToList();
+            if (files.Count == 0)
+                return Ok(new { status = "null", message = "Empty data" });
+
+            return Ok(new { data = files });
+        }
+
+        [HttpGet("GetBundleFiles/{rhaId}")]
+        public async Task<IActionResult> GetBundleFiles(string rhaId)
+        {
+            List<byte[]> filesPath = new List<byte[]>();
+            var results = await _rhaFileEvidence.GetByRhaID(rhaId);
+            var files = results.ToList();
+            if (files.Count == 0)
+                return Ok(new { status = "null", message = "Empty data" });
+
+            files.ForEach(file =>
+            {
+                var fPath = file.FilePath;
+                byte[] bytes = Encoding.ASCII.GetBytes(fPath);
+                filesPath.Add(bytes);
+            });
+
+            return DownloadMultipleFiles(filesPath);
+        }
+
+        private FileResult DownloadMultipleFiles(List<byte[]> byteArrayList)
+        {
+            var zipName = $"archive-EvidenceFiles-{DateTime.Now.ToString("yyyy_MM_dd-HH_mm_ss")}.zip";
+            using (MemoryStream ms = new MemoryStream())
+            {
+                using (var archive = new ZipArchive(ms, ZipArchiveMode.Create, true))
+                {
+                    foreach (var file in byteArrayList)
+                    {
+                        string fPath = Encoding.ASCII.GetString(file);
+                        var entry = archive.CreateEntry(fPath, CompressionLevel.Fastest);
+                        using (var zipStream = entry.Open())
+                        {
+                            zipStream.Write(file, 0, file.Length);
+                        }
+                    }
+                }
+                return File(ms.ToArray(), "application/zip", zipName);
+            }
+        }
 
         // POST api/<RHAFilesEvidenceController>
         [HttpPost(nameof(Upload))]
@@ -98,10 +177,10 @@ namespace GovernanceProjectService.Controllers
         }
 
         // PUT api/<RHAFilesEvidenceController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
+        //[HttpPut("{id}")]
+        //public void Put(int id, [FromBody] string value)
+        //{
+        //}
 
         //// DELETE api/<RHAFilesEvidenceController>/5
         //[HttpDelete("{id}")]

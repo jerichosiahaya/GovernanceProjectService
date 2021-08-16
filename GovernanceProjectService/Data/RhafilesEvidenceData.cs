@@ -49,7 +49,19 @@ namespace GovernanceProjectService.Data
 
         public async Task<RhafilesEvidence> GetById(string id)
         {
+            var result = await _db.RhafilesEvidences.Where(s => s.Id == Convert.ToInt32(id)).FirstOrDefaultAsync();
+            return result;
+        }
+
+        public Task<IEnumerable<RhafilesEvidence>> GetByNPP(string idRha)
+        {
             throw new NotImplementedException();
+        }
+
+        public async Task<IEnumerable<RhafilesEvidence>> GetByRhaID(string idRha)
+        {
+            var result = await _db.RhafilesEvidences.OrderByDescending(s => s.CreatedAt).Where(s => s.RhafilesId == Convert.ToInt32(idRha)).AsNoTracking().ToListAsync();
+            return result;
         }
     }
 }

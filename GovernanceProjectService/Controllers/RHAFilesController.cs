@@ -1,5 +1,6 @@
 ﻿using GovernanceProjectService.Data;
 using GovernanceProjectService.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -15,6 +16,7 @@ using System.Threading.Tasks;
 
 namespace GovernanceProjectService.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class RHAFilesController : ControllerBase
@@ -187,8 +189,6 @@ namespace GovernanceProjectService.Controllers
                 return BadRequest(ex.Message);
             }
         }
-
-        
 
         //[HttpPost]
         //public async Task<IActionResult> Post([FromForm] Rhafile rhafile)

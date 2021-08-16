@@ -8,5 +8,6 @@ namespace GovernanceProjectService.Data
 {
     public interface IRhafilesEvidence : ICrud<RhafilesEvidence>
     {
+        Task<IEnumerable<RhafilesEvidence>> GetByRhaID(string idRha);
     }
 }
