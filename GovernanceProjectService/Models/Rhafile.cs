@@ -9,6 +9,7 @@ namespace GovernanceProjectService.Models
     {
         public Rhafile()
         {
+            InputTlfiles = new HashSet<InputTlfile>();
             RhafilesEvidences = new HashSet<RhafilesEvidence>();
         }
 
@@ -27,6 +28,7 @@ namespace GovernanceProjectService.Models
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
 
+        public virtual ICollection<InputTlfile> InputTlfiles { get; set; }
         public virtual ICollection<RhafilesEvidence> RhafilesEvidences { get; set; }
     }
 }

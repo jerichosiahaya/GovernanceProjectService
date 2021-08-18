@@ -116,10 +116,11 @@ namespace GovernanceProjectService.Controllers
                     foreach (var file in byteArrayList)
                     {
                         string fPath = Encoding.ASCII.GetString(file);
-                        var entry = archive.CreateEntry(fPath, CompressionLevel.Fastest);
+                        var entry = archive.CreateEntry(Path.GetFileName(fPath), CompressionLevel.Fastest);
                         using (var zipStream = entry.Open())
                         {
-                            zipStream.Write(file, 0, file.Length);
+                            var bytes = System.IO.File.ReadAllBytes(fPath);
+                            zipStream.Write(bytes, 0, bytes.Length);
                         }
                     }
                 }

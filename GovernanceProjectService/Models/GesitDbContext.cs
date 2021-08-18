@@ -17,22 +17,106 @@ namespace GovernanceProjectService.Models
         {
         }
 
+        public virtual DbSet<InputTlfile> InputTlfiles { get; set; }
+        public virtual DbSet<InputTlfilesEvidence> InputTlfilesEvidences { get; set; }
         public virtual DbSet<Notification> Notifications { get; set; }
         public virtual DbSet<Rhafile> Rhafiles { get; set; }
         public virtual DbSet<RhafilesEvidence> RhafilesEvidences { get; set; }
 
-//        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-//        {
-//            if (!optionsBuilder.IsConfigured)
-//            {
-//#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-//                optionsBuilder.UseSqlServer("Server=.\\SQLEXPRESS;Database=GesitDb;Trusted_Connection=True;");
-//            }
-//        }
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
+                optionsBuilder.UseSqlServer("Server=.\\SQLEXPRESS;Database=GesitDb;Trusted_Connection=True;");
+            }
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasAnnotation("Relational:Collation", "Latin1_General_CI_AS");
+
+            modelBuilder.Entity<InputTlfile>(entity =>
+            {
+                entity.ToTable("InputTLFiles");
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.CreatedAt)
+                    .HasColumnType("datetime")
+                    .HasColumnName("created_at");
+
+                entity.Property(e => e.FileName)
+                    .IsRequired()
+                    .HasMaxLength(255)
+                    .HasColumnName("file_name");
+
+                entity.Property(e => e.FilePath)
+                    .IsRequired()
+                    .HasMaxLength(255)
+                    .HasColumnName("file_path");
+
+                entity.Property(e => e.FileSize).HasColumnName("file_size");
+
+                entity.Property(e => e.FileType)
+                    .IsRequired()
+                    .HasMaxLength(255)
+                    .HasColumnName("file_type");
+
+                entity.Property(e => e.Notes)
+                    .HasColumnType("text")
+                    .HasColumnName("notes");
+
+                entity.Property(e => e.RhafilesId).HasColumnName("rhafiles_id");
+
+                entity.Property(e => e.UpdatedAt)
+                    .HasColumnType("datetime")
+                    .HasColumnName("updated_at");
+
+                entity.HasOne(d => d.Rhafiles)
+                    .WithMany(p => p.InputTlfiles)
+                    .HasForeignKey(d => d.RhafilesId)
+                    .HasConstraintName("FK__InputTLFi__rhafi__6FE99F9F");
+            });
+
+            modelBuilder.Entity<InputTlfilesEvidence>(entity =>
+            {
+                entity.ToTable("InputTLFilesEvidence");
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.CreatedAt)
+                    .HasColumnType("datetime")
+                    .HasColumnName("created_at");
+
+                entity.Property(e => e.FileName)
+                    .IsRequired()
+                    .HasMaxLength(255)
+                    .HasColumnName("file_name");
+
+                entity.Property(e => e.FilePath)
+                    .IsRequired()
+                    .HasMaxLength(255)
+                    .HasColumnName("file_path");
+
+                entity.Property(e => e.FileSize).HasColumnName("file_size");
+
+                entity.Property(e => e.FileType)
+                    .IsRequired()
+                    .HasMaxLength(255)
+                    .HasColumnName("file_type");
+
+                entity.Property(e => e.InputtlfilesId).HasColumnName("inputtlfiles_id");
+
+                entity.Property(e => e.UpdatedAt)
+                    .HasColumnType("datetime")
+                    .HasColumnName("updated_at");
+
+                entity.HasOne(d => d.Inputtlfiles)
+                    .WithMany(p => p.InputTlfilesEvidences)
+                    .HasForeignKey(d => d.InputtlfilesId)
+                    .HasConstraintName("FK__InputTLFi__input__75A278F5");
+            });
 
             modelBuilder.Entity<Notification>(entity =>
             {
