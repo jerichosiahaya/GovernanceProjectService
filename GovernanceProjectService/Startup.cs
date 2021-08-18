@@ -63,6 +63,8 @@ namespace GovernanceProjectService
             services.AddScoped<INotification, NotificationData>();
             services.AddScoped<IRhafile, RhafileData>();
             services.AddScoped<IRhafilesEvidence, RhafilesEvidenceData>();
+            services.AddScoped<IInputTlfile, InputTlfileData>();
+            services.AddScoped<IInputTlfileEvidence, InputTlfileEvidenceData>();
 
         }
 
