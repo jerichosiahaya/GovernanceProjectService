@@ -9,7 +9,6 @@ namespace GovernanceProjectService.Models
     {
         public int Id { get; set; }
         public int RhafilesId { get; set; }
-        public bool? Status { get; set; }
         public string FileName { get; set; }
         public string FileType { get; set; }
         public long FileSize { get; set; }

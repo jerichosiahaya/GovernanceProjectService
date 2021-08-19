@@ -27,7 +27,7 @@ namespace GovernanceProjectService.Models
         public string CreatedBy { get; set; }
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
-
+        public int? StatusCompleted { get; set; }
         public virtual ICollection<InputTlfile> InputTlfiles { get; set; }
         public virtual ICollection<RhafilesEvidence> RhafilesEvidences { get; set; }
     }

@@ -16,6 +16,6 @@ namespace GovernanceProjectService.Models
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
 
-        internal virtual InputTlfile Inputtlfiles { get; set; }
+        public virtual InputTlfile Inputtlfiles { get; set; }
     }
 }

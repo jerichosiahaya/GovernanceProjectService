@@ -11,5 +11,6 @@ namespace GovernanceProjectService.Data
     {
         //Task UploadFile(IFormFile file);
         Task<IEnumerable<Rhafile>> GetByNPP(string npp);
+        Task<IEnumerable<Rhafile>> CountRha();
     }
 }

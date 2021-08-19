@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text.Json.Serialization;
 
 #nullable disable
 
@@ -22,8 +21,8 @@ namespace GovernanceProjectService.Models
         public string Notes { get; set; }
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
-        [JsonIgnore]
-        internal virtual Rhafile Rhafiles { get; set; }
+
+        public virtual Rhafile Rhafiles { get; set; }
         public virtual ICollection<InputTlfilesEvidence> InputTlfilesEvidences { get; set; }
     }
 }

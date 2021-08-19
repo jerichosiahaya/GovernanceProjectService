@@ -50,13 +50,19 @@ namespace GovernanceProjectService.Data
 
         public async Task<IEnumerable<Rhafile>> GetAll()
         {
-            var result = await _db.Rhafiles.Include(e => e.RhafilesEvidences).OrderByDescending(s => s.CreatedAt).AsNoTracking().ToListAsync();
+            var result = await _db.Rhafiles.Include(e => e.RhafilesEvidences).Include(e => e.InputTlfiles).ThenInclude(c=> c.InputTlfilesEvidences).OrderByDescending(s => s.CreatedAt).AsNoTracking().ToListAsync();
             return result;
         }
 
         public async Task<IEnumerable<Rhafile>> GetByNPP(string npp)
         {
             var result = await _db.Rhafiles.Where(s => s.Assign == npp).AsNoTracking().ToListAsync();
+            return result;
+        }
+
+        public async Task<IEnumerable<Rhafile>> CountRha()
+        {
+            var result = await _db.Rhafiles.AsNoTracking().ToListAsync();
             return result;
         }
 

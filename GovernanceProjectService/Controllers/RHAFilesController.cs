@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace GovernanceProjectService.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class RHAFilesController : ControllerBase
@@ -55,33 +55,33 @@ namespace GovernanceProjectService.Controllers
             //    var fileId = file.Id;
             //});
             // dari fe dibinding pake id di-endpointnya
-            return Ok(new { data = files});
+            return Ok(new { rha_count = files.Count(), data = files});
         }
 
         //// GET api/<RHAFilesController>/5
-        [HttpGet("Download/{id}")]
-        public async Task<IActionResult> Get(int id)
-        {
-            var results = await _rhaFile.GetById(id.ToString());
-            if (results == null)
-                return BadRequest(new { status = "Error", message = "There is no such a file" });
+        //[HttpGet("Download/{id}")]
+        //public async Task<IActionResult> Get(int id)
+        //{
+        //    var results = await _rhaFile.GetById(id.ToString());
+        //    if (results == null)
+        //        return BadRequest(new { status = "Error", message = "There is no such a file" });
 
-            var path = results.FilePath;
-            var fileName = results.FileName;
-            var fileType = results.FileType;
-            //byte[] arr = File.ReadAllBytes(fileName);
-            //var files = Directory.GetFiles(path);
-            var memory = new MemoryStream();
-            using (var stream = new FileStream(path, FileMode.Open))
-            {
-                await stream.CopyToAsync(memory);
-            }
-            byte[] arr = memory.ToArray();
-            memory.Position = 0;
-            //return File(memory, fileType, fileName);
-            return Ok(new { data = results, file = arr });
-            //return File.ReadAllBytes(fileName);
-        }
+        //    var path = results.FilePath;
+        //    var fileName = results.FileName;
+        //    var fileType = results.FileType;
+        //    //byte[] arr = File.ReadAllBytes(fileName);
+        //    //var files = Directory.GetFiles(path);
+        //    var memory = new MemoryStream();
+        //    using (var stream = new FileStream(path, FileMode.Open))
+        //    {
+        //        await stream.CopyToAsync(memory);
+        //    }
+        //    byte[] arr = memory.ToArray();
+        //    memory.Position = 0;
+        //    //return File(memory, fileType, fileName);
+        //    return Ok(new { data = results, file = arr });
+        //    //return File.ReadAllBytes(fileName);
+        //}
 
         [HttpGet("GetOnlyDetails/{id}")]
         public async Task<IActionResult> GetOnlyDetails(int id)
