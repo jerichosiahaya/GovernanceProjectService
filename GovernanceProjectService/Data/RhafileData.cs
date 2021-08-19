@@ -66,6 +66,28 @@ namespace GovernanceProjectService.Data
             return result;
         }
 
+        public async Task<IEnumerable<Rhafile>> CountRhaDone()
+        {
+            
+            var result = await _db.Rhafiles.Where(s => s.StatusCompleted == 1).Include(e => e.RhafilesEvidences).Include(e => e.InputTlfiles).ThenInclude(c => c.InputTlfilesEvidences).OrderByDescending(s => s.CreatedAt).AsNoTracking().ToListAsync();
+            return result;
+        }
+
+        public async Task<IEnumerable<Rhafile>> CountRhaPending()
+        {
+            var result = await _db.Rhafiles.Where(s => s.StatusCompleted == 0).Include(e => e.RhafilesEvidences).Include(e => e.InputTlfiles).ThenInclude(c => c.InputTlfilesEvidences).OrderByDescending(s => s.CreatedAt).AsNoTracking().ToListAsync();
+            return result;
+        }
+
+        public async Task<IEnumerable<Rhafile>> CountExistingFileNameRha(string filename)
+        {
+            var result = await _db.Rhafiles.Where(s => s.FileName.Contains(filename)).AsNoTracking().ToListAsync();
+            return result;
+            // TO DO
+            // select * from dbo.RHAFiles where CHARINDEX('t', file_name) > 0
+            //throw new NotImplementedException();
+        }
+
         //public Task UploadFile(IFormFile file)
         //{
         //    throw new NotImplementedException();

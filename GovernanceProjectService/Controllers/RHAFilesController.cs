@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace GovernanceProjectService.Controllers
 {
-    //[Authorize]
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class RHAFilesController : ControllerBase
@@ -161,24 +161,56 @@ namespace GovernanceProjectService.Controllers
 
                 string s = formFile.FileName;
                 int i = s.LastIndexOf('.');
-                string rhs = i < 0 ? "" : s.Substring(i + 1);
+                string lhs = i < 0 ? s : s.Substring(0, i), rhs = i < 0 ? "" : s.Substring(i + 1);
                 if (!allowedFileExtensions.Any(a => a.Equals(rhs)))
                 {
                     return BadRequest(new { status = "Error", message = $"File with extension {rhs} is not allowed", logtime = DateTime.Now });
                 }
                 var filePath = Path.Combine(target, formFile.FileName);
-                rhafile.FileName = formFile.FileName;
-                rhafile.FilePath = filePath;
+
                 rhafile.FileType = formFile.ContentType;
                 rhafile.FileSize = formFile.Length;
-                using (var stream = new FileStream(filePath, FileMode.Create))
+
+                if (System.IO.File.Exists(filePath))
                 {
-                    await formFile.CopyToAsync(stream);
-                    await _rhaFile.Insert(rhafile);
+                    // query for duplicate names to generate counter
+                    var duplicateNames = await _rhaFile.CountExistingFileNameRha(lhs); // using DI from data access layer
+                    var countDuplicateNames = duplicateNames.Count();
+                    var value = countDuplicateNames + 1;
+
+                    // getting duplicated name into array
+                    var listduplicateNames = duplicateNames.ToList();
+                    List<string> arrDuplicatedNames = new List<string>();
+                    listduplicateNames.ForEach(file =>
+                    {
+                        var dupNames = file.FileName;
+                        arrDuplicatedNames.Add(dupNames);
+                    });
+
+                    // generating new file name
+                    var newfileName = String.Format("{0}({1}){2}", Path.GetFileNameWithoutExtension(filePath), value, Path.GetExtension(filePath));
+                    var newFilePath = Path.Combine(target, newfileName);
+                    rhafile.FileName = newfileName;
+                    rhafile.FilePath = newFilePath;
+
+                    using (var stream = new FileStream(newFilePath, FileMode.Create))
+                    {
+                        await formFile.CopyToAsync(stream);
+                        await _rhaFile.Insert(rhafile);
+                    }
+                    return Ok(new { status = "Success", message = "File successfully uploaded", file_name = newfileName, file_size = formFile.Length, file_path = newFilePath, logtime = DateTime.Now, duplicated_filenames = arrDuplicatedNames.ToList() });
                 }
-                //await _rhaFile.Insert(rhafile);
-                //return Ok("Success");
-                return Ok(new { status = "Success", message = "File successfully uploaded", file_size = formFile.Length, file_path = filePath, logtime = DateTime.Now });
+                else
+                {
+                    rhafile.FileName = formFile.FileName;
+                    rhafile.FilePath = filePath;
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await formFile.CopyToAsync(stream);
+                        await _rhaFile.Insert(rhafile);
+                    }
+                    return Ok(new { status = "Success", message = "File successfully uploaded", file_size = formFile.Length, file_path = filePath, logtime = DateTime.Now });
+                }
             }
             catch (DbUpdateException dbEx)
             {
@@ -190,15 +222,63 @@ namespace GovernanceProjectService.Controllers
             }
         }
 
-        //[HttpPost]
-        //public async Task<IActionResult> Post([FromForm] Rhafile rhafile)
+        //[HttpGet("GetFileName")]
+        //public async Task<IEnumerable<Rhafile>> GetFileName(string filename)
         //{
+        //    var results = await _rhaFile.CountExistingFileNameRha(filename);
+        //    var files = results.ToList();
+        //    return files;
+        //}
+
+        //[HttpPost(nameof(TesUpload))]
+        //public async Task<IActionResult> TesUpload([Required] IFormFile formFile)
+        //{
+        //    var subDirectory = "UploadedFiles";
+        //    var target = Path.Combine(_hostingEnvironment.ContentRootPath, subDirectory);
+        //    Directory.CreateDirectory(target);
         //    try
         //    {
-        //        rhafile.FilePath = "DRIVE D";
-        //        await _rhaFile.Insert(rhafile);
-        //        return Ok("Success");
-        //     }
+        //        if (formFile.Length <= 0)
+        //        {
+        //            return BadRequest(new { status = "Error", message = "File is empty" });
+        //        }
+        //        else if (formFile.Length > 2000000)
+        //        {
+        //            return BadRequest(new { status = "Error", message = "Maximum file upload exceeded" });
+        //        }
+
+        //        string s = formFile.FileName;
+        //        int i = s.LastIndexOf('.');
+        //        string lhs = i < 0 ? s : s.Substring(0, i),
+        //            rhs = i < 0 ? "" : s.Substring(i + 1);
+        //        if (!allowedFileExtensions.Any(a => a.Equals(rhs)))
+        //        {
+        //            return BadRequest(new { status = "Error", message = $"File with extension {rhs} is not allowed", logtime = DateTime.Now });
+        //        }
+        //        var filePath = Path.Combine(target, formFile.FileName);
+
+        //        if (System.IO.File.Exists(filePath))
+        //        {
+        //            var duplicateNames = await _rhaFile.CountExistingFileNameRha(lhs);
+        //            var countDuplicateNames = duplicateNames.Count();
+        //            var value = countDuplicateNames + 1;
+        //            var newfileName = String.Format("{0}({1}){2}", Path.GetFileNameWithoutExtension(filePath), value, Path.GetExtension(filePath));
+        //            var newFilePath = Path.Combine(target, newfileName);
+
+        //            using (var stream = new FileStream(newFilePath, FileMode.Create))
+        //           {
+        //               await formFile.CopyToAsync(stream);
+        //           }
+        //            return Ok(new { status = "Success", message = "File successfully uploaded", file_name = lhs, file_size = formFile.Length, file_path = newFilePath, logtime = DateTime.Now });
+        //        } else
+        //        {
+        //            using (var stream = new FileStream(filePath, FileMode.Create))
+        //            {
+        //                await formFile.CopyToAsync(stream);
+        //            }
+        //            return Ok(new { status = "Success", message = "File successfully uploaded", file_name = lhs, file_size = formFile.Length, file_path = filePath, logtime = DateTime.Now });
+        //        }
+        //    }
         //    catch (DbUpdateException dbEx)
         //    {
         //        throw new Exception(dbEx.Message);
@@ -209,16 +289,35 @@ namespace GovernanceProjectService.Controllers
         //    }
         //}
 
-        //// PUT api/<RHAFilesController>/5
-        //[HttpPut("{id}")]
-        //public void Put(int id, [FromBody] string value)
-        //{
-        //}
+            //[HttpPost]
+            //public async Task<IActionResult> Post([FromForm] Rhafile rhafile)
+            //{
+            //    try
+            //    {
+            //        rhafile.FilePath = "DRIVE D";
+            //        await _rhaFile.Insert(rhafile);
+            //        return Ok("Success");
+            //     }
+            //    catch (DbUpdateException dbEx)
+            //    {
+            //        throw new Exception(dbEx.Message);
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        return BadRequest(ex.Message);
+            //    }
+            //}
 
-        //// DELETE api/<RHAFilesController>/5
-        //[HttpDelete("{id}")]
-        //public void Delete(int id)
-        //{
-        //}
-    }
+            //// PUT api/<RHAFilesController>/5
+            //[HttpPut("{id}")]
+            //public void Put(int id, [FromBody] string value)
+            //{
+            //}
+
+            //// DELETE api/<RHAFilesController>/5
+            //[HttpDelete("{id}")]
+            //public void Delete(int id)
+            //{
+            //}
+        }
 }

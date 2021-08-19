@@ -1,4 +1,5 @@
 ﻿using GovernanceProjectService.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -9,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace GovernanceProjectService.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ReportingController : ControllerBase
@@ -22,43 +24,35 @@ namespace GovernanceProjectService.Controllers
         [HttpGet("CountRHA")]
         public async Task<IActionResult> CountRHA()
         {
-            var results = await _rhaFile.CountRha();
-            var resultsCount = results.ToList();
-            if (resultsCount == null)
+            var countAll = await _rhaFile.CountRha();
+            var countDone = await _rhaFile.CountRhaDone();
+            var countPending = await _rhaFile.CountRhaPending();
+            if (countAll == null && countDone == null && countPending == null)
                 return BadRequest();
-            return Ok(new { rha_count = resultsCount.Count(), log_time = DateTime.Now });
+            return Ok(new { rha_count_all = countAll.Count(), rha_count_pending = countPending.Count(), rha_count_done = countDone.Count(), log_time = DateTime.Now });
         }
 
-        //// GET: api/<ReportingController>
-        //[HttpGet]
-        //public IEnumerable<string> Get()
-        //{
-        //    return new string[] { "value1", "value2" };
-        //}
+        [HttpGet("RHADone")]
+        public async Task<IActionResult> GetRHADone()
+        {
+            //var countAll = await _rhaFile.CountRha();
+            var countDone = await _rhaFile.CountRhaDone();
+            //var countPending = await _rhaFile.CountRhaPending();
+            if (countDone == null)
+                return BadRequest();
+            return Ok(new { data = countDone, log_time = DateTime.Now });
+        }
 
-        //// GET api/<ReportingController>/5
-        //[HttpGet("{id}")]
-        //public string Get(int id)
-        //{
-        //    return "value";
-        //}
+        [HttpGet("RHAPending")]
+        public async Task<IActionResult> GetRHAPending()
+        {
+            //var countAll = await _rhaFile.CountRha();
+            //var countDone = await _rhaFile.CountRhaDone();
+            var countPending = await _rhaFile.CountRhaPending();
+            if (countPending == null)
+                return BadRequest();
+            return Ok(new { data = countPending, log_time = DateTime.Now });
+        }
 
-        //// POST api/<ReportingController>
-        //[HttpPost]
-        //public void Post([FromBody] string value)
-        //{
-        //}
-
-        //// PUT api/<ReportingController>/5
-        //[HttpPut("{id}")]
-        //public void Put(int id, [FromBody] string value)
-        //{
-        //}
-
-        //// DELETE api/<ReportingController>/5
-        //[HttpDelete("{id}")]
-        //public void Delete(int id)
-        //{
-        //}
     }
 }

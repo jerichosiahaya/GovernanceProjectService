@@ -136,7 +136,7 @@ namespace GovernanceProjectService.Controllers
                     await formFile.CopyToAsync(stream);
                     await _tlFile.Insert(inputTL);
                 }
-                return Ok(new { status = "Success", message = "File successfully uploaded", file_name = formFile.FileName, file_size = formFile.Length, file_path = filePath, logtime = DateTime.Now });
+                return Ok(new { status = "Success", message = "File successfully uploaded", id = inputTL.Id, file_name = formFile.FileName, file_size = formFile.Length, file_path = filePath, logtime = DateTime.Now });
             }
             catch (DbUpdateException dbEx)
             {
