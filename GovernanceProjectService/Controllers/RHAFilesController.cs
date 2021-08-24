@@ -141,6 +141,21 @@ namespace GovernanceProjectService.Controllers
             return Ok(new { count = count.Count, data = results });
         }
 
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] Rhafile rhafile)
+        {
+            try
+            {
+                await _rhaFile.Update(id.ToString(), rhafile);
+                return Ok($"Data {rhafile.Id} berhasil diupdate!");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+
         // POST api/<RHAFilesController>
         [HttpPost(nameof(Upload))]
         public async Task<IActionResult> Upload([Required] IFormFile formFile, [FromForm] Rhafile rhafile)

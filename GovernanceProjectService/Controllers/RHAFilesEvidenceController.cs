@@ -106,6 +106,7 @@ namespace GovernanceProjectService.Controllers
             return DownloadMultipleFiles(filesPath);
         }
 
+        // function untuk download file yang banyak
         private FileResult DownloadMultipleFiles(List<byte[]> byteArrayList)
         {
             var zipName = $"archive-EvidenceFiles-{DateTime.Now.ToString("yyyy_MM_dd-HH_mm_ss")}.zip";
@@ -148,24 +149,54 @@ namespace GovernanceProjectService.Controllers
 
                 string s = formFile.FileName;
                 int i = s.LastIndexOf('.');
-                string rhs = i < 0 ? "" : s.Substring(i + 1);
+                string lhs = i < 0 ? s : s.Substring(0, i), rhs = i < 0 ? "" : s.Substring(i + 1);
                 if (!allowedFileExtensions.Any(a => a.Equals(rhs)))
                 {
                     return BadRequest(new { status = "Error", message = $"File with extension {rhs} is not allowed", logtime = DateTime.Now });
                 }
                 var filePath = Path.Combine(target, formFile.FileName);
-                rhafileEvidence.FileName = formFile.FileName;
-                rhafileEvidence.FilePath = filePath;
                 rhafileEvidence.FileType = formFile.ContentType;
                 rhafileEvidence.FileSize = formFile.Length;
-                using (var stream = new FileStream(filePath, FileMode.Create))
+                if (System.IO.File.Exists(filePath))
                 {
-                    await formFile.CopyToAsync(stream);
-                    await _rhaFileEvidence.Insert(rhafileEvidence);
+                    // query for duplicate names to generate counter
+                    var duplicateNames = await _rhaFileEvidence.CountExistingFileNameRhaEvidence(lhs); // using DI from data access layer
+                    var countDuplicateNames = duplicateNames.Count();
+                    var value = countDuplicateNames + 1;
+
+                    // getting duplicated name into array
+                    var listduplicateNames = duplicateNames.ToList();
+                    List<string> arrDuplicatedNames = new List<string>();
+                    listduplicateNames.ForEach(file =>
+                    {
+                        var dupNames = file.FileName;
+                        arrDuplicatedNames.Add(dupNames);
+                    });
+
+                    // generating new file name
+                    var newfileName = String.Format("{0}({1}){2}", Path.GetFileNameWithoutExtension(filePath), value, Path.GetExtension(filePath));
+                    var newFilePath = Path.Combine(target, newfileName);
+                    rhafileEvidence.FileName = newfileName;
+                    rhafileEvidence.FilePath = newFilePath;
+
+                    using (var stream = new FileStream(newFilePath, FileMode.Create))
+                    {
+                        await formFile.CopyToAsync(stream);
+                        await _rhaFileEvidence.Insert(rhafileEvidence);
+                    }
+                    return Ok(new { status = "Success", message = "File successfully uploaded", file_name = newfileName, file_size = formFile.Length, file_path = newFilePath, logtime = DateTime.Now, duplicated_filenames = arrDuplicatedNames.ToList() });
                 }
-                //await _rhaFile.Insert(rhafile);
-                //return Ok("Success");
-                return Ok(new { status = "Success", message = "File successfully uploaded", file_size = formFile.Length, file_path = filePath, logtime = DateTime.Now });
+                else
+                {
+                    rhafileEvidence.FileName = formFile.FileName;
+                    rhafileEvidence.FilePath = filePath;
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await formFile.CopyToAsync(stream);
+                        await _rhaFileEvidence.Insert(rhafileEvidence);
+                    }
+                    return Ok(new { status = "Success", message = "File successfully uploaded", file_size = formFile.Length, file_path = filePath, logtime = DateTime.Now });
+                }
             }
             catch (DbUpdateException dbEx)
             {
@@ -176,6 +207,14 @@ namespace GovernanceProjectService.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        //[HttpGet("GetFileName")]
+        //public async Task<IEnumerable<RhafilesEvidence>> GetFileName(string filename)
+        //{
+        //    var results = await _rhaFileEvidence.CountExistingFileNameRhaEvidence(filename);
+        //    var files = results.ToList();
+        //    return files;
+        //}
 
         // PUT api/<RHAFilesEvidenceController>/5
         //[HttpPut("{id}")]

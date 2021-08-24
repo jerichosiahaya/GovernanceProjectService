@@ -43,9 +43,35 @@ namespace GovernanceProjectService.Data
             }
         }
 
-        public Task Update(string id, Rhafile obj)
+        public async Task Update(string id, Rhafile obj)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var result = await GetById(id);
+                if (result != null)
+                {
+                    result.SubKondisi = obj.SubKondisi;
+                    result.Kondisi = obj.Kondisi;
+                    result.Rekomendasi = obj.Rekomendasi;
+                    result.TindakLanjut = obj.TindakLanjut;
+                    result.TargetDate = obj.TargetDate;
+                    result.Assign = obj.Assign;
+                    await _db.SaveChangesAsync();
+                }
+                else
+                {
+                    throw new Exception($"Data {id} not found");
+                }
+            }
+            catch (DbUpdateException DbEx)
+            {
+
+                throw new Exception(DbEx.Message);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
 
         public async Task<IEnumerable<Rhafile>> GetAll()

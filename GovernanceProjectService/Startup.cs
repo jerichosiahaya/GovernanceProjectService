@@ -35,7 +35,7 @@ namespace GovernanceProjectService
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "GovernanceProjectService", Version = "v1" });
             });
 
-            services.AddDbContext<GesitDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("ServerConnection")));
+            services.AddDbContext<GesitDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("LocalConnection")));
 
             //services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
             var appSettingsSection = Configuration.GetSection("JWT");

@@ -63,5 +63,11 @@ namespace GovernanceProjectService.Data
             var result = await _db.RhafilesEvidences.OrderByDescending(s => s.CreatedAt).Where(s => s.RhafilesId == Convert.ToInt32(idRha)).AsNoTracking().ToListAsync();
             return result;
         }
+
+        public async Task<IEnumerable<RhafilesEvidence>> CountExistingFileNameRhaEvidence(string filename)
+        {
+            var result = await _db.RhafilesEvidences.Where(s => s.FileName.Contains(filename)).AsNoTracking().ToListAsync();
+            return result;
+        }
     }
 }
