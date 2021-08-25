@@ -14,6 +14,13 @@ namespace GovernanceProjectService.Data
         {
             _db = db;
         }
+
+        public async Task<IEnumerable<InputTlfilesEvidence>> CountExistingFileNameInputTLEvidence(string filename)
+        {
+            var result = await _db.InputTlfilesEvidences.Where(s => s.FileName.Contains(filename)).AsNoTracking().ToListAsync();
+            return result;
+        }
+
         public Task Delete(string id)
         {
             throw new NotImplementedException();

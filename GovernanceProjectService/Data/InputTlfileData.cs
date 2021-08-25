@@ -14,6 +14,13 @@ namespace GovernanceProjectService.Data
         {
             _db = db;
         }
+
+        public async Task<IEnumerable<InputTlfile>> CountExistingFileNameInputTL(string filename)
+        {
+            var result = await _db.InputTlfiles.Where(s => s.FileName.Contains(filename)).AsNoTracking().ToListAsync();
+            return result;
+        }
+
         public Task Delete(string id)
         {
             throw new NotImplementedException();
@@ -106,5 +113,6 @@ namespace GovernanceProjectService.Data
                 throw new Exception(ex.Message);
             }
         }
+
     }
 }

@@ -15,6 +15,7 @@ namespace GovernanceProjectService.Data
         Task<IEnumerable<Rhafile>> CountRhaDone();
         Task<IEnumerable<Rhafile>> CountRhaPending();
         Task<IEnumerable<Rhafile>> CountExistingFileNameRha(string filename);
+        Task UpdateStatus(string id, int status);
 
     }
 }

@@ -8,5 +8,6 @@ namespace GovernanceProjectService.Data
 {
     public interface IInputTlfileEvidence : ICrud<InputTlfilesEvidence>
     {
+        Task<IEnumerable<InputTlfilesEvidence>> CountExistingFileNameInputTLEvidence(string filename);
     }
 }

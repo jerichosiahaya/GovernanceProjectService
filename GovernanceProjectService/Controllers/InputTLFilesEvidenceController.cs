@@ -100,22 +100,56 @@ namespace GovernanceProjectService.Controllers
 
                 string s = formFile.FileName;
                 int i = s.LastIndexOf('.');
-                string rhs = i < 0 ? "" : s.Substring(i + 1);
+                string lhs = i < 0 ? s : s.Substring(0, i), rhs = i < 0 ? "" : s.Substring(i + 1);
                 if (!allowedFileExtensions.Any(a => a.Equals(rhs)))
                 {
                     return BadRequest(new { status = "Error", message = $"File with extension {rhs} is not allowed", logtime = DateTime.Now });
                 }
                 var filePath = Path.Combine(target, formFile.FileName);
-                inputTLEvidence.FileName = formFile.FileName;
-                inputTLEvidence.FilePath = filePath;
+                //inputTLEvidence.FileName = formFile.FileName;
+                //inputTLEvidence.FilePath = filePath;
                 inputTLEvidence.FileType = formFile.ContentType;
                 inputTLEvidence.FileSize = formFile.Length;
-                using (var stream = new FileStream(filePath, FileMode.Create))
+                if (System.IO.File.Exists(filePath))
                 {
-                    await formFile.CopyToAsync(stream);
-                    await _tlFileEvidence.Insert(inputTLEvidence);
+                    // query for duplicate names to generate counter
+                    var duplicateNames = await _tlFileEvidence.CountExistingFileNameInputTLEvidence(lhs); // using DI from data access layer
+                    var countDuplicateNames = duplicateNames.Count();
+                    var value = countDuplicateNames + 1;
+
+                    // getting duplicated name into array
+                    var listduplicateNames = duplicateNames.ToList();
+                    List<string> arrDuplicatedNames = new List<string>();
+                    listduplicateNames.ForEach(file =>
+                    {
+                        var dupNames = file.FileName;
+                        arrDuplicatedNames.Add(dupNames);
+                    });
+
+                    // generating new file name
+                    var newfileName = String.Format("{0}({1}){2}", Path.GetFileNameWithoutExtension(filePath), value, Path.GetExtension(filePath));
+                    var newFilePath = Path.Combine(target, newfileName);
+                    inputTLEvidence.FileName = newfileName;
+                    inputTLEvidence.FilePath = newFilePath;
+
+                    using (var stream = new FileStream(newFilePath, FileMode.Create))
+                    {
+                        await formFile.CopyToAsync(stream);
+                        await _tlFileEvidence.Insert(inputTLEvidence);
+                    }
+                    return Ok(new { status = "Success", message = "File successfully uploaded", file_name = newfileName, file_size = formFile.Length, file_path = newFilePath, logtime = DateTime.Now, duplicated_filenames = arrDuplicatedNames.ToList() });
                 }
-                return Ok(new { status = "Success", message = "File successfully uploaded", file_size = formFile.Length, file_path = filePath, logtime = DateTime.Now });
+                else
+                {
+                    inputTLEvidence.FileName = formFile.FileName;
+                    inputTLEvidence.FilePath = filePath;
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await formFile.CopyToAsync(stream);
+                        await _tlFileEvidence.Insert(inputTLEvidence);
+                    }
+                    return Ok(new { status = "Success", message = "File successfully uploaded", file_size = formFile.Length, file_path = filePath, logtime = DateTime.Now });
+                }
             }
             catch (DbUpdateException dbEx)
             {

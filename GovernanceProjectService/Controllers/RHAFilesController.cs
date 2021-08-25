@@ -21,9 +21,9 @@ namespace GovernanceProjectService.Controllers
     [ApiController]
     public class RHAFilesController : ControllerBase
     {
-        private IHostingEnvironment _hostingEnvironment;
+        private IWebHostEnvironment _hostingEnvironment;
         private IRhafile _rhaFile;
-        public RHAFilesController(IRhafile rhaFile, IHostingEnvironment hostingEnvironment)
+        public RHAFilesController(IRhafile rhaFile, IWebHostEnvironment hostingEnvironment)
         {
             _rhaFile = rhaFile;
             _hostingEnvironment = hostingEnvironment;
@@ -155,6 +155,23 @@ namespace GovernanceProjectService.Controllers
             }
         }
 
+        [HttpPut("UpdateStatus/{id}")]
+        public async Task<IActionResult> UpdateStatus(int id, [FromForm] int status)
+        {
+            try
+            {
+                await _rhaFile.UpdateStatus(id.ToString(), status);
+                return Ok($"Data berhasil diupdate!");
+            }
+            catch (DbUpdateException dbEx)
+            {
+                throw new Exception(dbEx.Message);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
 
         // POST api/<RHAFilesController>
         [HttpPost(nameof(Upload))]

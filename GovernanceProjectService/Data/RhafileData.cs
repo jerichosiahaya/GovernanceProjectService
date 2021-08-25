@@ -114,6 +114,32 @@ namespace GovernanceProjectService.Data
             //throw new NotImplementedException();
         }
 
+        public async Task UpdateStatus(string id, int status)
+        {
+            try
+            {
+                var result = await GetById(id);
+                if (result != null)
+                {
+                    result.StatusCompleted = status;
+                    await _db.SaveChangesAsync();
+                }
+                else
+                {
+                    throw new Exception($"Data {id} not found");
+                }
+            }
+            catch (DbUpdateException DbEx)
+            {
+
+                throw new Exception(DbEx.Message);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
         //public Task UploadFile(IFormFile file)
         //{
         //    throw new NotImplementedException();
